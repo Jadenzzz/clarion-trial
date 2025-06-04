@@ -5,7 +5,6 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-import { TrpcModule } from './trpc/trpc.module';
 import { CallsModule } from './calls/calls.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
@@ -16,7 +15,6 @@ import { AssistantModule } from './assistant/assistant.module';
 @Module({
   imports: [
     UsersModule,
-    TrpcModule,
     CallsModule,
     SupabaseModule,
     VapiModule,
