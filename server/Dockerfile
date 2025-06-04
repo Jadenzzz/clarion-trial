@@ -10,5 +10,5 @@ RUN npm run build
 RUN rm -rf ./src
 
 EXPOSE 8080
-CMD ["npm", "run", "supabase:push"]
 CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "supabase:push"]
