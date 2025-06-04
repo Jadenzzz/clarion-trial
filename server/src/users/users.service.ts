@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { User } from './user.schema';
-import { TRPCError } from '@trpc/server';
 
 @Injectable()
 export class UsersService {
@@ -53,7 +52,7 @@ export class UsersService {
     const user = this.users.find((user) => user.id === id);
 
     if (!user) {
-      throw new TRPCError({ message: 'User not found', code: 'NOT_FOUND' });
+      throw new NotFoundException('User not found');
     }
     return user;
   }

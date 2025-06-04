@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TRPCError } from '@trpc/server';
 import { SupabaseService } from '../supabase/supabase.service';
 import { Database } from 'database.types';
 
@@ -19,10 +18,7 @@ export class CallService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      throw new TRPCError({
-        message: error.message,
-        code: 'INTERNAL_SERVER_ERROR',
-      });
+      throw new NotFoundException(error.message);
     }
 
     if (status && (!data || data.length === 0)) {
@@ -41,8 +37,8 @@ export class CallService {
       .order('start_timestamp', { foreignTable: 'message', ascending: true })
       .single();
 
-    if (error || !data) {
-      throw new TRPCError({ message: 'Call not found', code: 'NOT_FOUND' });
+    if (error) {
+      throw new NotFoundException(error.message);
     }
 
     return data;
@@ -57,10 +53,7 @@ export class CallService {
       .single();
 
     if (error) {
-      throw new TRPCError({
-        message: error.message,
-        code: 'INTERNAL_SERVER_ERROR',
-      });
+      throw new NotFoundException(error.message);
     }
 
     return newCall;
@@ -79,14 +72,7 @@ export class CallService {
       .single();
 
     if (error) {
-      throw new TRPCError({
-        message: error.message,
-        code: 'INTERNAL_SERVER_ERROR',
-      });
-    }
-
-    if (!updatedCall) {
-      throw new TRPCError({ message: 'Call not found', code: 'NOT_FOUND' });
+      throw new NotFoundException(error.message);
     }
 
     return updatedCall;
@@ -102,10 +88,7 @@ export class CallService {
       .eq('id', id);
 
     if (error) {
-      throw new TRPCError({
-        message: error.message,
-        code: 'INTERNAL_SERVER_ERROR',
-      });
+      throw new NotFoundException(error.message);
     }
 
     return;
@@ -118,10 +101,7 @@ export class CallService {
       .select('*, assistant(name)');
 
     if (error) {
-      throw new TRPCError({
-        message: error.message,
-        code: 'INTERNAL_SERVER_ERROR',
-      });
+      throw new NotFoundException(error.message);
     }
 
     return data || [];
