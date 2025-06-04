@@ -21,7 +21,8 @@
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:migration": "supabase migration new",
-    "supabase:push": "supabase migration up",
+    "supabase:up": "supabase migration up",
+    "supabase:push": "supabase db push",
     "supabase:studio": "supabase studio"
   },
   "dependencies": {
