@@ -1,12 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
 
-@Controller('calls')
-export class CallsController {
+@Controller()
+export class AppController {
   constructor() {}
 
-  // GET /calls/:id - Get a specific call by ID
+  // GET / - Default route
   @Get()
   get() {
-    console.log('Hello world');
+    console.log('Default URL accessed');
+    return 'Jaydennn';
   }
 }

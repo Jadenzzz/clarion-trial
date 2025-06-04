@@ -11,6 +11,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { SupabaseModule } from './supabase/supabase.module';
 import { VapiModule } from './vapi/vapi.module';
 import { AssistantModule } from './assistant/assistant.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AssistantModule } from './assistant/assistant.module';
     VapiModule,
     AssistantModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
