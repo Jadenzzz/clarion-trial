@@ -1,0 +1,1 @@
+alter table call add column ended_reason text;
