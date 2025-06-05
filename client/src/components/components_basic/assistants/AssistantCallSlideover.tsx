@@ -19,7 +19,7 @@ export default function AssistantCallSlideover({
   onClose: () => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const messagesRef = useRef<HTMLDivElement>(null);
+  const messages_ref = useRef<HTMLDivElement>(null);
 
   const [call_duration, setCallDuration] = useState<string>("00:00");
   const [call_status, setCallStatus] = useState<
@@ -50,7 +50,10 @@ export default function AssistantCallSlideover({
   useEffect(() => {
     const handleMessage = (message: any) => {
       if (message.type === "transcript") {
-        if (message.transcriptType === "final" && (message.role === "assistant" || message.role === "user")) {
+        if (
+          message.transcriptType === "final" &&
+          (message.role === "assistant" || message.role === "user")
+        ) {
           setMessages((prev) => [
             ...prev,
             {
@@ -65,15 +68,13 @@ export default function AssistantCallSlideover({
           const formatted_messages = message.conversation
             .filter(
               (msg: any) =>
-                (msg.content && msg.content.trim() !== "") &&
+                msg.content &&
+                msg.content.trim() !== "" &&
                 (msg.role === "assistant" || msg.role === "user")
             )
             .map((msg: any) => ({
               role: msg.role === "user" ? "user" : "bot",
               content: msg.content,
-              timestamp: new Date(
-                msg.timestamp || Date.now()
-              ).toLocaleTimeString(),
             }));
 
           setMessages(formatted_messages);
@@ -119,8 +120,8 @@ export default function AssistantCallSlideover({
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    if (messages_ref.current) {
+      messages_ref.current.scrollTop = messages_ref.current.scrollHeight;
     }
   }, [messages]);
 
@@ -163,7 +164,7 @@ export default function AssistantCallSlideover({
         </div>
 
         {/* Messages */}
-        <div ref={messagesRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div ref={messages_ref} className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message, index) => (
             <div key={index} className="flex items-start gap-3">
               {/* Avatar */}
@@ -182,7 +183,9 @@ export default function AssistantCallSlideover({
                 <div
                   className={`rounded-lg p-3 bg-gray-50 border border-gray-200 transition-all duration-300 ease-in-out`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
                 </div>
                 {/* {message.timestamp && (
                   <span className="text-xs text-gray-500 mt-1 block">

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AssistantWithStats } from "@/public /types/assistant";
 import { useState } from "react";
 import AssistantCard from "@/components/components_basic/assistants/AssistantCard";
@@ -15,6 +15,7 @@ const getAssistants = async (): Promise<AssistantWithStats[]> => {
 };
 
 function Assistants() {
+  const query_client = useQueryClient();
   const [selected_assistant_id, setSelectedAssistantId] = useState<
     string | null
   >(null);
@@ -39,6 +40,7 @@ function Assistants() {
     },
     onSuccess: () => {
       toast.success("Assistants synced successfully");
+      query_client.invalidateQueries({ queryKey: ["assistants"] });
       setSyncing(false);
     },
     onError: () => {
