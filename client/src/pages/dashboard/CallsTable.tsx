@@ -29,6 +29,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import DropdownFilter from "@/components/components_basic/filters/DropdownFilter";
 import { motion } from "motion/react";
+import Loader from "@/components/components_basic/Loader";
 const getCalls = async (): Promise<Call[]> => {
   const res = await fetch(import.meta.env.VITE_SERVER_URL + "/calls");
   return res.json();
@@ -55,7 +56,7 @@ function CallsTable() {
   const [search_string, setSearchString] = useState<string>("");
   // const [selected_success, setSelectedSuccess] = useState<boolean>(false);
 
-  const { data } = useQuery({
+  const { data, isLoading: is_loading } = useQuery({
     queryKey: ["calls"],
     queryFn: getCalls,
   });
@@ -524,6 +525,14 @@ function CallsTable() {
     }[];
   }, [selected_row_ids]);
 
+  if (is_loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full ">
       {/* <h1 className="text-2xl font-norma mb-3">Calls</h1> */}
@@ -704,7 +713,9 @@ function CallsTable() {
             params.delete("call_id");
             navigate(`${pathname}?${params.toString()}`, { replace: true });
           }}
-          title={`Call Report - ${table_data.find((call) => call.id === selected_call_id)?.vapi_id}`}
+          title={`Call Report - ${
+            table_data.find((call) => call.id === selected_call_id)?.vapi_id
+          }`}
         >
           <CallReportView call_id={selected_call_id} />
         </Slideover>

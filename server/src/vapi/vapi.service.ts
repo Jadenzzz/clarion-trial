@@ -502,7 +502,10 @@ export class VapiService {
 
     if (messages && messages.length > 0 && !!updated_call[0].id) {
       for (const msg of messages) {
-        const { error: messageError } = await this.supabaseClient
+        if (!msg.message) {
+          continue;
+        }
+        const { error: message_error } = await this.supabaseClient
           .from('message')
           .insert({
             call_id: updated_call[0].id,
@@ -512,8 +515,8 @@ export class VapiService {
             end_timestamp: msg.endTime ?? null,
           });
 
-        if (messageError) {
-          console.error('Failed to insert message:', messageError);
+        if (message_error) {
+          console.error('Failed to insert message:', message_error);
         }
       }
     }

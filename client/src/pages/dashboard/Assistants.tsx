@@ -6,6 +6,7 @@ import AssistantCard from "@/components/components_basic/assistants/AssistantCar
 // import { PlusIcon } from "lucide-react";
 
 import AssistantCallSlideover from "@/components/components_basic/assistants/AssistantCallSlideover";
+import Loader from "@/components/components_basic/Loader";
 
 const getAssistants = async (): Promise<Assistant[]> => {
   const res = await fetch(
@@ -39,7 +40,7 @@ function Assistants() {
   // };
 
   if (isLoading) {
-    return <p>Loading assistants...</p>;
+    return <Loader />;
   }
 
   return (
