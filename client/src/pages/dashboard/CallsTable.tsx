@@ -558,7 +558,7 @@ function CallsTable() {
         label: "Export",
         icon: FileSpreadsheet,
         onClick: () => {
-          handleExportCSV("calls.csv", table_data);
+          handleExportCSV("calls.csv", table_data.filter((call) => selected_row_ids.includes(call.id)));
         },
         disabled: selected_row_ids.length === 0,
       },
