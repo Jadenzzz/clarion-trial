@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/components_basic/Loader";
 import { Toaster } from "react-hot-toast";
 import { formatDuration } from "@/utils";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const TABS = [
   {
@@ -37,10 +38,22 @@ const getStats = async (): Promise<Stats> => {
 };
 
 function DashboardPage() {
+  const navigate = useNavigate();
+  const { search, pathname } = useLocation();
+  const params = new URLSearchParams(search);
+
   const { data: stats, isLoading: is_loading } = useQuery({
     queryKey: ["stats"],
     queryFn: getStats,
   });
+
+  const active_tab = params.get("tab") || "assistants";
+
+  const handleTabChange = (value: string) => {
+    params.set("tab", value);
+
+    navigate(`${pathname}?${params.toString()}`, { replace: true });
+  };
 
   // Calculate stats constants
   const total_calls_change = stats?.yesterday_total_count
@@ -136,7 +149,11 @@ function DashboardPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue={TABS[0].value} className="w-full">
+      <Tabs
+        value={active_tab}
+        onValueChange={handleTabChange}
+        className="w-full"
+      >
         <TabsList className="w-full mt-2 mb-2">
           {TABS.map((tab) => (
             <TabsTrigger
