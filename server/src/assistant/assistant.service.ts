@@ -10,36 +10,46 @@ import {
 export class AssistantService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async getAllAssistants(userId?: string): Promise<Assistant[]> {
-    const supabase = this.supabaseService.getClient();
-
-    let query = supabase.from('assistant').select('*');
-
-    if (userId) {
-      query = query.eq('user_id', userId);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      throw new Error(`Failed to fetch assistants: ${error.message}`);
-    }
-
-    return data || [];
-  }
-
-  async getAllAssistantsWithStats(): Promise<Assistant[]> {
+  async getAllAssistants(): Promise<Assistant[]> {
     const supabase = this.supabaseService.getClient();
 
     const { data, error } = await supabase
       .from('assistant')
-      .select('*, call(id, status, transcript)');
+      .select('*, call(ended_reason, started_at, ended_at)');
+
+    const mapped_assistants = data?.map((assistant) => {
+      const total_calls = assistant.call?.length || 0;
+      const avg_call_duration = Math.round(
+        assistant.call?.reduce((acc, call) => {
+          if (!call?.started_at || !call?.ended_at) return acc;
+          const duration =
+            (new Date(call.ended_at).getTime() -
+              new Date(call.started_at).getTime()) /
+            1000;
+          return acc + duration;
+        }, 0) / (total_calls || 1),
+      );
+
+      const success_rate = Number(
+        (
+          (assistant.call?.reduce((acc, call) => {
+            if (!call?.ended_reason) return acc;
+            return (
+              acc + (call.ended_reason.toLowerCase().includes('error') ? 0 : 1)
+            );
+          }, 0) /
+            (total_calls || 1)) *
+          100
+        ).toFixed(1),
+      );
+      return { ...assistant, total_calls, avg_call_duration, success_rate };
+    });
 
     if (error) {
       throw new Error(`Failed to fetch assistants: ${error.message}`);
     }
 
-    return data || [];
+    return mapped_assistants || [];
   }
 
   async getAssistantById(id: string): Promise<Assistant> {

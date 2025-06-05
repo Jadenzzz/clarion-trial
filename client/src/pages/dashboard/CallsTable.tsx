@@ -17,14 +17,12 @@ import dayjs from "dayjs";
 import { formatCallEndedReason } from "@/utils";
 import Badge from "@/components/components_basic/Badge";
 import {
-  Check,
   ChevronDownIcon,
   CircleCheck,
   CircleX,
   Eye,
   EyeOff,
   FileSpreadsheet,
-  X,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import DropdownFilter from "@/components/components_basic/filters/DropdownFilter";
@@ -54,7 +52,6 @@ function CallsTable() {
     []
   );
   const [search_string, setSearchString] = useState<string>("");
-  // const [selected_success, setSelectedSuccess] = useState<boolean>(false);
 
   const { data, isLoading: is_loading } = useQuery({
     queryKey: ["calls"],
@@ -483,27 +480,87 @@ function CallsTable() {
     return Array.from(call_type_map.values());
   }, [data]);
 
-  const exportCalls = () => {
-    console.log("exporting calls");
+  const handleExportCSV = async (filename: string, rows: typeof table_data) => {
+    const mappedRows: any[] = rows.map((row) => {
+      return [
+        row.id,
+        row.vapi_id,
+        row.assistant_id,
+        row.assistant.name,
+        CALL_TYPE_TO_TEXT[row.type as keyof typeof CALL_TYPE_TO_TEXT],
+        row.summary,
+        row.ended_reason,
+        row.success,
+        row.cost?.toFixed(2) || "0.00",
+        row.duration
+          ? `${Math.floor(row.duration / 60)}:${(row.duration % 60)
+              .toString()
+              .padStart(2, "0")}`
+          : "",
+        dayjs(row.started_at).format("MM/DD/YYYY hh:mm:ss A"),
+      ];
+    });
+    mappedRows.unshift([
+      "Call ID",
+      "Vapi ID",
+      "Assistant ID",
+      "Assistant",
+      "Type",
+      "Summary",
+      "Ended Reason",
+      "Success",
+      "Cost",
+      "Duration",
+      "Started At",
+    ]);
+
+    const processRow = (row: any[]) => {
+      let final = "";
+      for (let j = 0; j < row.length; j++) {
+        if (!row[j]) {
+          final += ",";
+          continue;
+        }
+        let inner = row[j].toString();
+        if (row[j] instanceof Date) {
+          inner = row[j].toLocaleString();
+        }
+        let result = inner.replace(/"/g, '""');
+        if (result.search(/("|,|\n)/g) >= 0) result = '"' + result + '"'; //escape any quotes or commas or newlines
+        if (j > 0) final += ",";
+        final += result;
+      }
+      return final + "\n";
+    };
+
+    let csv_str = "";
+    for (let i = 0; i < mappedRows.length; i++) {
+      csv_str += processRow(mappedRows[i]);
+    }
+
+    const blob = new Blob([csv_str], { type: "text/csv;charset=utf-8;" });
+
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const bulk_actions = useMemo(() => {
     return [
       {
-        label:
-          selected_row_ids.length === table_data.length && table_data.length > 0
-            ? "Deselect all (" + selected_row_ids.length + ")"
-            : "Select all",
-        icon: selected_row_ids.length > 0 ? X : Check,
+        label: "Export",
+        icon: FileSpreadsheet,
         onClick: () => {
-          if (selected_row_ids.length > 0) {
-            setSelectedRowIds([]);
-          } else {
-            setSelectedRowIds(table_data.map((call) => call.id));
-          }
+          handleExportCSV("calls.csv", table_data);
         },
-        disabled: false,
-        // active: selected_row_ids.length > 0,
+        disabled: selected_row_ids.length === 0,
       },
       {
         label: show_selected ? "Show all" : "Show selected",
@@ -523,7 +580,7 @@ function CallsTable() {
       active?: boolean;
       disabled?: boolean;
     }[];
-  }, [selected_row_ids]);
+  }, [selected_row_ids, show_selected, table_data]);
 
   if (is_loading) {
     return (
@@ -592,17 +649,17 @@ function CallsTable() {
                 </span>{" "}
                 calls selected
               </div>
-              <div className="flex items-center rounded-md border divide-x">
-                <button
+              <div className="flex items-center rounded-md border ">
+                {/* <button
                   className="text-xs text-black flex items-center justify-center px-2.5 select-none py-[3px] transition hover:bg-neutral-100 bg-white border-neutral-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white rounded-l-md"
                   disabled={selected_row_ids.length === 0}
                   onClick={exportCalls}
                 >
                   <FileSpreadsheet className="h-3 w-3 mr-1" />
                   Export
-                </button>
+                </button> */}
                 <button
-                  className={`text-xs text-black flex gap-1 items-center justify-center px-2.5 select-none py-[3px] transition hover:bg-neutral-100 bg-white border-neutral-200 whitespace-nowrap ml-1 ${
+                  className={`cursor-pointer rounded-md text-xs text-black flex gap-1 items-center justify-center px-2.5 select-none py-[3px] transition hover:bg-neutral-100 bg-white border-neutral-200 whitespace-nowrap  ${
                     show_selected || selected_row_ids.length > 0
                       ? "filter-select"
                       : ""
@@ -653,7 +710,7 @@ function CallsTable() {
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            action?.onClick && action.onClick();
+                            action?.onClick?.();
                           }}
                           disabled={action.disabled}
                         >

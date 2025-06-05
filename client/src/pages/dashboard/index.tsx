@@ -10,6 +10,11 @@ import {
   Users,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Stats } from "@/public /types/call";
+import { useQuery } from "@tanstack/react-query";
+import Loader from "@/components/components_basic/Loader";
+import { Toaster } from "react-hot-toast";
+import { formatDuration } from "@/utils";
 
 const TABS = [
   {
@@ -25,7 +30,46 @@ const TABS = [
     icon: <PhoneCallIcon className="w-4 h-4" />,
   },
 ];
+
+const getStats = async (): Promise<Stats> => {
+  const res = await fetch(import.meta.env.VITE_SERVER_URL + "/calls/stats");
+  return res.json();
+};
+
 function DashboardPage() {
+  const { data: stats, isLoading: is_loading } = useQuery({
+    queryKey: ["stats"],
+    queryFn: getStats,
+  });
+
+  // Calculate stats constants
+  const total_calls_change = stats?.yesterday_total_count
+    ? stats?.yesterday_total_count - stats?.total_count
+    : 0;
+
+  const success_rate_change = stats?.yesterday_success_rate
+    ? stats?.yesterday_success_rate - stats?.success_rate
+    : 0;
+
+  const avg_duration_formatted = formatDuration(stats?.avg_duration);
+
+  const avg_duration_change =
+    stats?.yesterday_avg_duration && stats?.avg_duration
+      ? (() => {
+          const diff = stats.yesterday_avg_duration - stats.avg_duration;
+          const minutes = Math.floor(Math.abs(diff) / 60);
+          const seconds = Math.abs(diff) % 60;
+          const sign = diff > 0 ? "+" : "";
+          return minutes > 0
+            ? `${sign}${Math.floor(diff / 60)}m ${seconds}s`
+            : `${sign}${Math.floor(diff)}s`;
+        })()
+      : "0s";
+
+  if (is_loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto overflow-auto mt-10">
       <div className="flex flex-col gap-2 mb-4">
@@ -46,9 +90,9 @@ function DashboardPage() {
             <Phone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">178</div>
+            <div className="text-2xl font-bold">{stats?.total_count}</div>
             <p className="text-xs text-muted-foreground">
-              +12% from last month
+              {total_calls_change}% from yesterday
             </p>
           </CardContent>
         </Card>
@@ -58,8 +102,10 @@ function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">97%</div>
-            <p className="text-xs text-muted-foreground">+2% from last month</p>
+            <div className="text-2xl font-bold">{stats?.success_rate}%</div>
+            <p className="text-xs text-muted-foreground">
+              {success_rate_change}% from yesterday
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -68,8 +114,10 @@ function DashboardPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3m 18s</div>
-            <p className="text-xs text-muted-foreground">-5s from last month</p>
+            <div className="text-2xl font-bold">{avg_duration_formatted}</div>
+            <p className="text-xs text-muted-foreground">
+              {avg_duration_change} from yesterday
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -80,7 +128,7 @@ function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{stats?.assistant_count}</div>
             <p className="text-xs text-muted-foreground">
               All systems operational
             </p>
@@ -91,7 +139,11 @@ function DashboardPage() {
       <Tabs defaultValue={TABS[0].value} className="w-full">
         <TabsList className="w-full mt-2 mb-2">
           {TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="cursor-pointer"
+            >
               {tab.icon}
               {tab.label}
             </TabsTrigger>
@@ -103,6 +155,7 @@ function DashboardPage() {
           </TabsContent>
         ))}
       </Tabs>
+      <Toaster position="bottom-right" reverseOrder={false} />
     </div>
   );
 }

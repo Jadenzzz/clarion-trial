@@ -16,12 +16,9 @@ export interface SourcingTableDropdownFilterOption {
 export interface SourcingTableDropdownFilterProps {
   label: string;
   width?: string;
-
   placeholder?: string;
-
   options: SourcingTableDropdownFilterOption[];
   values: string[];
-
   loading?: boolean;
   onChange: (values: string[]) => void;
 }

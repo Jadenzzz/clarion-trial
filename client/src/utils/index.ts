@@ -39,3 +39,10 @@ export function generateColorFromText(str: string) {
   ];
   return colors[Math.abs(hash) % colors.length];
 }
+
+export const formatDuration = (duration: number | undefined) => {
+  if (!duration) return "0s";
+  const minutes = Math.floor(duration / 60);
+  const seconds = duration % 60;
+  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+};

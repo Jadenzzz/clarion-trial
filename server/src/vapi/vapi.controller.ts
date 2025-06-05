@@ -9,6 +9,8 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { VapiService } from './vapi.service';
 
@@ -152,10 +154,31 @@ export class VapiController {
   }
 
   @Post('webhooks')
-  async handleWebhook(@Body() webhookData: any) {
+  async handleWebhook(
+    @Body() webhookData: any,
+    @Headers('X-VAPI-SECRET') signature: string,
+  ) {
     try {
+      // Authenticate webhook using secret token
+      const secret_token = process.env.VAPI_WEBHOOK_SECRET;
+      if (!secret_token) {
+        this.logger.error('VAPI_WEBHOOK_SECRET not configured');
+        throw new HttpException(
+          'Webhook authentication not configured',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      if (!signature || signature !== secret_token) {
+        this.logger.warn(`Invalid webhook signature received ${signature}`);
+        throw new UnauthorizedException('Invalid webhook signature');
+      }
+
       return await this.vapiService.handleWebhook(webhookData);
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       this.logger.error('Failed to handle webhook', error);
       throw new HttpException(
         'Failed to handle webhook',

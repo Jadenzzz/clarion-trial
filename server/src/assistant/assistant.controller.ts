@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Param,
-  Query,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -18,15 +17,9 @@ export class AssistantController {
   constructor(private readonly assistantService: AssistantService) {}
 
   @Get()
-  async getAllAssistants(
-    @Query('userId') userId?: string,
-    @Query('stats') stats?: string,
-  ) {
+  async getAllAssistants() {
     try {
-      if (stats) {
-        return this.assistantService.getAllAssistantsWithStats();
-      }
-      return this.assistantService.getAllAssistants(userId);
+      return this.assistantService.getAllAssistants();
     } catch (error) {
       throw new HttpException(
         error.message || 'Failed to get assistants',

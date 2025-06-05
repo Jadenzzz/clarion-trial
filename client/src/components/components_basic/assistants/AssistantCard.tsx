@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Assistant } from "@/public /types/assistant";
+import type { AssistantWithStats } from "@/public /types/assistant";
 import { GRADIENT_BG, GRADIENT_BG_HOVER } from "@/utils/constants";
 import { PhoneCallIcon } from "lucide-react";
 import Badge from "../Badge";
+import { formatDuration } from "@/utils";
 
 export default function AssistantCard({
   assistant,
@@ -12,7 +13,7 @@ export default function AssistantCard({
   is_on_call,
   disabled,
 }: {
-  assistant: Assistant;
+  assistant: AssistantWithStats;
   onCall: (assistant_id: string) => void;
   onEndCall: () => void;
   is_on_call: boolean;
@@ -52,15 +53,21 @@ export default function AssistantCard({
         {/*Stats*/}
         <div className="flex flex-row justify-between w-full ">
           <div className="flex flex-col items-center gap-1">
-            <div className="text-lg font-bold text-gray-800">89</div>
+            <div className="text-lg font-bold text-gray-800">
+              {assistant.total_calls}
+            </div>
             <div className="text-xs text-gray-500">Total Calls</div>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <div className="text-lg font-bold text-gray-800">3m 18s</div>
+            <div className="text-lg font-bold text-gray-800">
+              {formatDuration(assistant.avg_call_duration)}
+            </div>
             <div className="text-xs text-gray-500">Avg Duration</div>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <div className="text-lg font-bold text-green-600">97%</div>
+            <div className="text-lg font-bold text-green-600">
+              {assistant.success_rate}%
+            </div>
             <div className="text-xs text-gray-500">Success Rate</div>
           </div>
         </div>

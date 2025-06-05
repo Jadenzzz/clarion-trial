@@ -1,17 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import type { Assistant } from "@/public /types/assistant";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { AssistantWithStats } from "@/public /types/assistant";
 import { useState } from "react";
 import AssistantCard from "@/components/components_basic/assistants/AssistantCard";
-// import { Button } from "@/components/ui/button";
-// import { PlusIcon } from "lucide-react";
 
 import AssistantCallSlideover from "@/components/components_basic/assistants/AssistantCallSlideover";
 import Loader from "@/components/components_basic/Loader";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
-const getAssistants = async (): Promise<Assistant[]> => {
-  const res = await fetch(
-    import.meta.env.VITE_SERVER_URL + "/assistants?stats=true"
-  );
+const getAssistants = async (): Promise<AssistantWithStats[]> => {
+  const res = await fetch(import.meta.env.VITE_SERVER_URL + "/assistants");
   return res.json();
 };
 
@@ -19,25 +18,34 @@ function Assistants() {
   const [selected_assistant_id, setSelectedAssistantId] = useState<
     string | null
   >(null);
+  const [syncing, setSyncing] = useState(false);
 
   const { data: assistants, isLoading } = useQuery({
     queryKey: ["assistants"],
     queryFn: getAssistants,
   });
 
-  // const handleStartCall = (assistant_id: string) => {
-  //   VapiService.start(assistant_id, () => {
-  //     setSelectedAssistantId(assistant_id);
-  //   });
-  // };
+  const syncAssistants = async () => {
+    const res = await fetch(
+      import.meta.env.VITE_SERVER_URL + "/vapi/assistants"
+    );
+    return res.json();
+  };
 
-  // const handleEndCall = () => {
-  //   setSelectedAssistantId(null);
-  //   VapiService.stop(() => {
-  //     setSelectedAssistantId(null);
-  //   });
-  //   queryClient.invalidateQueries({ queryKey: ["calls"] });
-  // };
+  const { mutate: handleSyncAssistants } = useMutation({
+    mutationFn: syncAssistants,
+    onMutate: () => {
+      setSyncing(true);
+    },
+    onSuccess: () => {
+      toast.success("Assistants synced successfully");
+      setSyncing(false);
+    },
+    onError: () => {
+      toast.error("Failed to sync assistants");
+      setSyncing(false);
+    },
+  });
 
   if (isLoading) {
     return <Loader />;
@@ -45,13 +53,13 @@ function Assistants() {
 
   return (
     <div className="w-full mx-auto overflow-auto ">
-      {/* <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-normal">Assistants</h1>
-        <Button>
-          <PlusIcon className="w-4 h-4" />
-          New Assistant
+      <div className="flex justify-between items-center mb-3">
+        <h1 className="text-2xl font-semibold">Assistants</h1>
+        <Button onClick={() => handleSyncAssistants()} disabled={syncing}>
+          <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
+          Sync Assistants
         </Button>
-      </div> */}
+      </div>
       <div className="grid grid-cols-4 gap-8  px-1">
         {assistants?.map((assistant) => (
           <AssistantCard
@@ -72,7 +80,6 @@ function Assistants() {
         {selected_assistant_id && (
           <AssistantCallSlideover
             assistant_id={selected_assistant_id}
-
             onClose={() => setSelectedAssistantId(null)}
           />
         )}

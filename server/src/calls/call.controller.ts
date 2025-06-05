@@ -7,6 +7,9 @@ import {
   Body,
   Patch,
   Logger,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CallService } from './call.service';
 import { CallInsertDto, CallUpdateDto } from './call.type';
@@ -24,7 +27,26 @@ export class CallsController {
       return await this.callService.createCall(data);
     } catch (error) {
       this.logger.error('Error creating call:', error);
-      throw error;
+      if (
+        error.message?.includes('validation') ||
+        error.message?.includes('invalid')
+      ) {
+        throw new BadRequestException('Invalid call data provided');
+      }
+      throw new InternalServerErrorException('Failed to create call');
+    }
+  }
+
+  // GET /calls/stats - All call stats
+  @Get('/stats')
+  async getAllCallStats() {
+    try {
+      return await this.callService.getAllCallsStats();
+    } catch (error) {
+      this.logger.error('Error getting all call reports:', error);
+      throw new InternalServerErrorException(
+        'Failed to retrieve call statistics',
+      );
     }
   }
 
@@ -35,18 +57,19 @@ export class CallsController {
       return await this.callService.getCallById(id);
     } catch (error) {
       this.logger.error(`Error getting call by id ${id}:`, error);
-      throw error;
-    }
-  }
-
-  // GET /calls/call-reports - Get all call reports
-  @Get('call-reports')
-  async getAllCallReports() {
-    try {
-      return await this.callService.findAll();
-    } catch (error) {
-      this.logger.error('Error getting all call reports:', error);
-      throw error;
+      if (
+        error.message?.includes('not_found') ||
+        error.message?.includes('not found')
+      ) {
+        throw new NotFoundException(`Call with ID ${id} not found`);
+      }
+      if (
+        error.message?.includes('invalid') ||
+        error.message?.includes('validation')
+      ) {
+        throw new BadRequestException('Invalid call ID provided');
+      }
+      throw new InternalServerErrorException('Failed to retrieve call');
     }
   }
 
@@ -57,7 +80,7 @@ export class CallsController {
       return await this.callService.getAllCalls();
     } catch (error) {
       this.logger.error('Error getting all calls:', error);
-      throw error;
+      throw new InternalServerErrorException('Failed to retrieve calls');
     }
   }
 
@@ -68,7 +91,19 @@ export class CallsController {
       return await this.callService.update(id, data);
     } catch (error) {
       this.logger.error(`Error updating call ${id}:`, error);
-      throw error;
+      if (
+        error.message?.includes('not_found') ||
+        error.message?.includes('not found')
+      ) {
+        throw new NotFoundException(`Call with ID ${id} not found`);
+      }
+      if (
+        error.message?.includes('validation') ||
+        error.message?.includes('invalid')
+      ) {
+        throw new BadRequestException('Invalid update data provided');
+      }
+      throw new InternalServerErrorException('Failed to update call');
     }
   }
 
@@ -79,7 +114,13 @@ export class CallsController {
       return await this.callService.delete(id);
     } catch (error) {
       this.logger.error(`Error deleting call ${id}:`, error);
-      throw error;
+      if (
+        error.message?.includes('not_found') ||
+        error.message?.includes('not found')
+      ) {
+        throw new NotFoundException(`Call with ID ${id} not found`);
+      }
+      throw new InternalServerErrorException('Failed to delete call');
     }
   }
 }

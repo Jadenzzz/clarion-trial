@@ -25,4 +25,14 @@ export type Message = {
   end_timestmap: number | null;
 };
 
+export type Stats = {
+  total_count: number;
+  yesterday_total_count: number;
+  success_rate: number;
+  yesterday_success_rate: number;
+  avg_duration: number;
+  yesterday_avg_duration: number;
+  assistant_count: number;
+};
+
 export type CallForReportView = Call & { message: Message[] };

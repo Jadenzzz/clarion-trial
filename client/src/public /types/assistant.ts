@@ -10,6 +10,8 @@ export type Assistant = {
 
 export type AssistantStats = {
   total_calls: number;
-  avg_duration: number;
+  avg_call_duration: number;
   success_rate: number;
 };
+
+export type AssistantWithStats = Assistant & AssistantStats;

@@ -1,6 +1,7 @@
 import { XIcon } from "lucide-react";
-import React, { useEffect } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import useEsc from "@/hooks/useEsc";
 
 export default function Slideover({
   open,
@@ -17,25 +18,7 @@ export default function Slideover({
   small?: boolean;
   hide_header?: boolean;
 }) {
-  //
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open) {
-        onClose();
-      }
-    };
-
-    if (open) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
-  }, [open, onClose]);
-
+  useEsc({onClose});
   return (
     <AnimatePresence>
       {open && (
