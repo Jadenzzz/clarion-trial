@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       assistant: {
@@ -76,12 +51,18 @@ export type Database = {
       call: {
         Row: {
           assistant_id: string | null
+          cost: number | null
           created_at: string | null
+          ended_at: string | null
+          ended_reason: string | null
           id: string
           phone_call_transport: string | null
+          phone_number: string | null
+          phone_number_id: string | null
           recording_url: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["call_status"] | null
           summary: string | null
-          title: string
           transcript: string | null
           type: string | null
           updated_at: string | null
@@ -89,12 +70,18 @@ export type Database = {
         }
         Insert: {
           assistant_id?: string | null
+          cost?: number | null
           created_at?: string | null
+          ended_at?: string | null
+          ended_reason?: string | null
           id?: string
           phone_call_transport?: string | null
+          phone_number?: string | null
+          phone_number_id?: string | null
           recording_url?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["call_status"] | null
           summary?: string | null
-          title: string
           transcript?: string | null
           type?: string | null
           updated_at?: string | null
@@ -102,12 +89,18 @@ export type Database = {
         }
         Update: {
           assistant_id?: string | null
+          cost?: number | null
           created_at?: string | null
+          ended_at?: string | null
+          ended_reason?: string | null
           id?: string
           phone_call_transport?: string | null
+          phone_number?: string | null
+          phone_number_id?: string | null
           recording_url?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["call_status"] | null
           summary?: string | null
-          title?: string
           transcript?: string | null
           type?: string | null
           updated_at?: string | null
@@ -127,34 +120,31 @@ export type Database = {
         Row: {
           call_id: string
           created_at: string | null
-          duration: number
-          end_timestamp: number
+          end_timestamp: number | null
           id: string
           message: string
           role: string
-          start_timestamp: number
+          start_timestamp: number | null
           updated_at: string | null
         }
         Insert: {
           call_id: string
           created_at?: string | null
-          duration: number
-          end_timestamp: number
+          end_timestamp?: number | null
           id?: string
           message: string
           role: string
-          start_timestamp: number
+          start_timestamp?: number | null
           updated_at?: string | null
         }
         Update: {
           call_id?: string
           created_at?: string | null
-          duration?: number
-          end_timestamp?: number
+          end_timestamp?: number | null
           id?: string
           message?: string
           role?: string
-          start_timestamp?: number
+          start_timestamp?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -175,7 +165,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      call_status:
+        | "scheduled"
+        | "queued"
+        | "ringing"
+        | "in-progress"
+        | "forwarding"
+        | "ended"
+      call_type: "inboundPhoneCall" | "outboundPhoneCall" | "webCall"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -289,11 +286,17 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
-    Enums: {},
+    Enums: {
+      call_status: [
+        "scheduled",
+        "queued",
+        "ringing",
+        "in-progress",
+        "forwarding",
+        "ended",
+      ],
+      call_type: ["inboundPhoneCall", "outboundPhoneCall", "webCall"],
+    },
   },
 } as const
-

@@ -702,7 +702,7 @@ function CallsTable() {
             data={table_data}
             tooltip_ref={tooltip_ref}
             columns={table_columns}
-            default_sort={{ id: "created_at", desc: true }}
+            default_sort={{ id: "started_at", desc: true }}
           />
         )}
       </div>

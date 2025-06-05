@@ -6,8 +6,8 @@ export const GRADIENT_BG_HOVER =
 
 export const CALL_TYPES = {
   WEB: "webCall",
-  INBOUND: "inbound",
-  OUTBOUND: "outbound",
+  INBOUND: "inboundPhoneCall",
+  OUTBOUND: "outboundPhoneCall",
 } as const;
 
 export const CALL_TYPE_TO_TEXT = {
@@ -17,8 +17,8 @@ export const CALL_TYPE_TO_TEXT = {
 };
 
 export const CALL_TYPE_TO_COLOR = {
-  [CALL_TYPES.WEB]: "green",
-  [CALL_TYPES.INBOUND]: "purple",
+  [CALL_TYPES.WEB]: "purple",
+  [CALL_TYPES.INBOUND]: "green",
   [CALL_TYPES.OUTBOUND]: "yellow",
 };
 

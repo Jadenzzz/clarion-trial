@@ -6,47 +6,80 @@ import {
   Param,
   Body,
   Patch,
+  Logger,
 } from '@nestjs/common';
 import { CallService } from './call.service';
 import { CallInsertDto, CallUpdateDto } from './call.type';
 
 @Controller('calls')
 export class CallsController {
+  private readonly logger = new Logger(CallsController.name);
+
   constructor(private readonly callService: CallService) {}
 
   // POST /calls - Create a new call
   @Post()
-  createCall(@Body() data: CallInsertDto) {
-    return this.callService.createCall(data);
+  async createCall(@Body() data: CallInsertDto) {
+    try {
+      return await this.callService.createCall(data);
+    } catch (error) {
+      this.logger.error('Error creating call:', error);
+      throw error;
+    }
   }
 
   // GET /calls/:id - Get a specific call by ID
   @Get(':id')
-  getCallById(@Param('id') id: string) {
-    return this.callService.getCallById(id);
+  async getCallById(@Param('id') id: string) {
+    try {
+      return await this.callService.getCallById(id);
+    } catch (error) {
+      this.logger.error(`Error getting call by id ${id}:`, error);
+      throw error;
+    }
   }
 
   // GET /calls/call-reports - Get all call reports
   @Get('call-reports')
-  getAllCallReports() {
-    return this.callService.findAll();
+  async getAllCallReports() {
+    try {
+      return await this.callService.findAll();
+    } catch (error) {
+      this.logger.error('Error getting all call reports:', error);
+      throw error;
+    }
   }
 
   // GET /calls - Get all calls with optional status filter
   @Get()
-  getAllCalls() {
-    return this.callService.getAllCalls();
+  async getAllCalls() {
+    try {
+      return await this.callService.getAllCalls();
+    } catch (error) {
+      this.logger.error('Error getting all calls:', error);
+      throw error;
+    }
   }
 
   // PATCH /calls/:id - Update a specific call by ID
   @Patch(':id')
-  updateCall(@Param('id') id: string, @Body() data: CallUpdateDto) {
-    return this.callService.update(id, data);
+  async updateCall(@Param('id') id: string, @Body() data: CallUpdateDto) {
+    try {
+      return await this.callService.update(id, data);
+    } catch (error) {
+      this.logger.error(`Error updating call ${id}:`, error);
+      throw error;
+    }
   }
 
   // DELETE /calls/:id - Delete a specific call by ID
   @Delete(':id')
-  deleteCall(@Param('id') id: string) {
-    return this.callService.delete(id);
+  async deleteCall(@Param('id') id: string) {
+    try {
+      return await this.callService.delete(id);
+    } catch (error) {
+      this.logger.error(`Error deleting call ${id}:`, error);
+      throw error;
+    }
   }
 }

@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import Badge from "../Badge";
 import { formatCallEndedReason } from "@/utils";
 import { CALL_TYPE_TO_TEXT } from "@/utils/constants";
+import Loader from "../Loader";
 
 const TABS = [
   {
@@ -34,7 +35,7 @@ export default function CallReportView({ call_id }: { call_id: string }) {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   if (call) {
@@ -67,7 +68,7 @@ export default function CallReportView({ call_id }: { call_id: string }) {
                         Started At
                       </div>
                       <div className="font-medium">
-                        {dayjs(call.created_at).format("D MMM YYYY, HH:mm:ss")}
+                        {dayjs(call.started_at).format("D MMM YYYY, HH:mm:ss")}
                       </div>
                     </div>
                     <div>

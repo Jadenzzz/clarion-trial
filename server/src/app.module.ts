@@ -4,7 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
+
 import { CallsModule } from './calls/calls.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
@@ -14,13 +14,7 @@ import { AssistantModule } from './assistant/assistant.module';
 import { AppController } from './app.controller';
 
 @Module({
-  imports: [
-    UsersModule,
-    CallsModule,
-    SupabaseModule,
-    VapiModule,
-    AssistantModule,
-  ],
+  imports: [CallsModule, SupabaseModule, VapiModule, AssistantModule],
   controllers: [AppController],
 })
 export class AppModule implements NestModule {

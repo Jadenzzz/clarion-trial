@@ -7,7 +7,6 @@ export class AppController {
   // GET / - Default route
   @Get()
   get() {
-    console.log('Default URL accessed');
     return 'Jaydennn';
   }
 }

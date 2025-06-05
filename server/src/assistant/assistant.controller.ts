@@ -7,6 +7,8 @@ import {
   Body,
   Param,
   Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AssistantService } from './assistant.service';
 import { CreateAssistantDto, UpdateAssistantDto } from './assistant.type';
@@ -20,20 +22,41 @@ export class AssistantController {
     @Query('userId') userId?: string,
     @Query('stats') stats?: string,
   ) {
-    if (stats) {
-      return this.assistantService.getAllAssistantsWithStats();
+    try {
+      if (stats) {
+        return this.assistantService.getAllAssistantsWithStats();
+      }
+      return this.assistantService.getAllAssistants(userId);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to get assistants',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return this.assistantService.getAllAssistants(userId);
   }
 
   @Get(':id')
   async getAssistantById(@Param('id') id: string) {
-    return this.assistantService.getAssistantById(id);
+    try {
+      return this.assistantService.getAssistantById(id);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to get assistant',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Post()
   async create(@Body() createAssistantDto: CreateAssistantDto) {
-    return this.assistantService.create(createAssistantDto);
+    try {
+      return this.assistantService.create(createAssistantDto);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to create assistant',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Put(':id')
@@ -41,11 +64,25 @@ export class AssistantController {
     @Param('id') id: string,
     @Body() updateAssistantDto: UpdateAssistantDto,
   ) {
-    return this.assistantService.update(id, updateAssistantDto);
+    try {
+      return this.assistantService.update(id, updateAssistantDto);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to update assistant',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.assistantService.remove(id);
+    try {
+      return this.assistantService.remove(id);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Failed to remove assistant',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
